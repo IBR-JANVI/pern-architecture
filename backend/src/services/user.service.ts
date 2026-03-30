@@ -1,12 +1,33 @@
 import { prisma } from '../lib/prisma.js';
 import { NotFoundError, ConflictError } from '../utils/AppError.js';
-import type { User, Role } from '@prisma/client';
+
+export type UserRole = 'USER' | 'ADMIN';
+
+export interface UserType {
+  id: string;
+  email: string;
+  name: string | null;
+  role: UserRole;
+}
+
+export interface UserResponse {
+  id: string;
+  email: string;
+  name: string | null;
+  role: UserRole;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface UserWithPassword extends UserResponse {
+  password: string;
+}
 
 export interface CreateUserData {
   email: string;
   name: string;
   password: string;
-  role?: Role;
+  role?: UserRole;
 }
 
 export interface UpdateUserData {
@@ -15,7 +36,7 @@ export interface UpdateUserData {
 }
 
 export class UserService {
-  async findById(id: string): Promise<User> {
+  async findById(id: string): Promise<UserResponse> {
     const user = await prisma.user.findUnique({
       where: { id },
     });
@@ -27,38 +48,50 @@ export class UserService {
     return user;
   }
 
-  async findByEmail(email: string): Promise<User | null> {
-    return prisma.user.findUnique({
-      where: { email },
+  async findByIdWithPassword(id: string): Promise<UserWithPassword | null> {
+    const user = await prisma.user.findUnique({
+      where: { id },
     });
+
+    return user as UserWithPassword | null;
   }
 
-  async create(data: CreateUserData): Promise<User> {
+  async findByEmail(email: string): Promise<UserResponse | null> {
+    const user = await prisma.user.findUnique({
+      where: { email },
+    });
+
+    return user;
+  }
+
+  async findByEmailWithPassword(email: string): Promise<UserWithPassword | null> {
+    const user = await prisma.user.findUnique({
+      where: { email },
+    });
+
+    return user as UserWithPassword | null;
+  }
+
+  async create(data: CreateUserData): Promise<UserResponse> {
     const existingUser = await this.findByEmail(data.email);
 
     if (existingUser) {
       throw new ConflictError('User with this email already exists');
     }
 
-    return prisma.user.create({
+    const user = await prisma.user.create({
       data: {
         email: data.email,
         name: data.name,
         password: data.password,
         role: data.role || 'USER',
       },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        role: true,
-        createdAt: true,
-        updatedAt: true,
-      },
     });
+
+    return user;
   }
 
-  async update(id: string, data: UpdateUserData): Promise<User> {
+  async update(id: string, data: UpdateUserData): Promise<UserResponse> {
     const user = await this.findById(id);
 
     if (data.email && data.email !== user.email) {
@@ -68,18 +101,12 @@ export class UserService {
       }
     }
 
-    return prisma.user.update({
+    const updatedUser = await prisma.user.update({
       where: { id },
       data,
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        role: true,
-        createdAt: true,
-        updatedAt: true,
-      },
     });
+
+    return updatedUser;
   }
 
   async delete(id: string): Promise<void> {
@@ -89,20 +116,14 @@ export class UserService {
     });
   }
 
-  async findAll(): Promise<User[]> {
-    return prisma.user.findMany({
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        role: true,
-        createdAt: true,
-        updatedAt: true,
-      },
+  async findAll(): Promise<UserResponse[]> {
+    const users = await prisma.user.findMany({
       orderBy: {
         createdAt: 'desc',
       },
     });
+
+    return users;
   }
 }
 

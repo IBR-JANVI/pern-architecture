@@ -18,7 +18,6 @@ export class AppError extends Error {
     this.details = details;
 
     Object.setPrototypeOf(this, AppError.prototype);
-    Error.captureStackTrace(this, this.constructor);
   }
 
   toJSON() {

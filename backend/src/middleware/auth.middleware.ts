@@ -3,13 +3,13 @@ import jwt from 'jsonwebtoken';
 import { env } from '../config/env.js';
 import { UnauthorizedError } from '../utils/AppError.js';
 
-export interface AuthRequest extends Request {
-  user?: {
-    id: string;
-    email: string;
-    role: string;
-  };
+export interface AuthUser {
+  id: string;
+  email: string;
+  role: string;
 }
+
+type AuthRequest = Request & { user?: AuthUser };
 
 export const authMiddleware = async (
   req: AuthRequest,
@@ -25,11 +25,7 @@ export const authMiddleware = async (
 
     const token = authHeader.substring(7);
 
-    const decoded = jwt.verify(token, env.JWT_SECRET) as {
-      id: string;
-      email: string;
-      role: string;
-    };
+    const decoded = jwt.verify(token, env.JWT_SECRET) as AuthUser;
 
     req.user = decoded;
     next();
@@ -54,11 +50,7 @@ export const optionalAuthMiddleware = async (
 
     if (authHeader && authHeader.startsWith('Bearer ')) {
       const token = authHeader.substring(7);
-      const decoded = jwt.verify(token, env.JWT_SECRET) as {
-        id: string;
-        email: string;
-        role: string;
-      };
+      const decoded = jwt.verify(token, env.JWT_SECRET) as AuthUser;
       req.user = decoded;
     }
 
@@ -67,3 +59,5 @@ export const optionalAuthMiddleware = async (
     next();
   }
 };
+
+export type { AuthRequest };

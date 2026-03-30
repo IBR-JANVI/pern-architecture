@@ -1,9 +1,8 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { env } from '../config/env.js';
-import { userService } from './user.service.js';
-import { UnauthorizedError, BadRequestError } from '../utils/AppError.js';
-import type { User } from '@prisma/client';
+import { userService, type UserType } from './user.service.js';
+import { UnauthorizedError } from '../utils/AppError.js';
 
 export interface TokenPayload {
   id: string;
@@ -32,7 +31,7 @@ export interface RegisterData {
 }
 
 export class AuthService {
-  private generateToken(user: User): string {
+  private generateToken(user: UserType): string {
     const payload: TokenPayload = {
       id: user.id,
       email: user.email,
@@ -40,7 +39,7 @@ export class AuthService {
     };
 
     return jwt.sign(payload, env.JWT_SECRET, {
-      expiresIn: env.JWT_EXPIRES_IN,
+      expiresIn: '7d',
     });
   }
 
@@ -66,7 +65,7 @@ export class AuthService {
   }
 
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
-    const user = await userService.findByEmail(credentials.email);
+    const user = await userService.findByEmailWithPassword(credentials.email);
 
     if (!user) {
       throw new UnauthorizedError('Invalid credentials');

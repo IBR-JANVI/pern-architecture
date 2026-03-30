@@ -1,8 +1,11 @@
 import pino from 'pino';
 
+const logLevel = process.env.LOG_LEVEL || 'info';
+const nodeEnv = process.env.NODE_ENV || 'development';
+
 export const logger = pino({
-  level: process.env.LOG_LEVEL || 'info',
-  transport: process.env.NODE_ENV === 'development'
+  level: logLevel,
+  transport: nodeEnv === 'development'
     ? {
         target: 'pino-pretty',
         options: {
@@ -11,7 +14,7 @@ export const logger = pino({
       }
     : undefined,
   formatters: {
-    level: (label) => {
+    level: (label: string) => {
       return { level: label };
     },
   },

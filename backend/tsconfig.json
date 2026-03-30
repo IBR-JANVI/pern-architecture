@@ -25,7 +25,8 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"]
-    }
+    },
+    "types": ["node"]
   },
   "include": ["src/**/*", "prisma/seed.ts"],
   "exclude": ["node_modules", "dist"]

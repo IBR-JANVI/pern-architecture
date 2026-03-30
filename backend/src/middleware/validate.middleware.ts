@@ -22,18 +22,16 @@ export const validate = (schema: ZodSchema) => {
       next();
     } catch (error) {
       if (error instanceof ZodError) {
-        const details = error.errors.reduce(
-          (acc, err) => {
-            const path = err.path.join('.');
-            acc[path] = err.message;
-            return acc;
-          },
-          {} as Record<string, string>
-        );
+        const details: Record<string, string> = {};
+        
+        for (const err of error.errors) {
+          const path = err.path.join('.');
+          details[path] = err.message;
+        }
 
         next(new ValidationError('Validation failed', details));
       } else {
-        next(error);
+        next(error as Error);
       }
     }
   };
@@ -50,18 +48,16 @@ export const validateBody = (schema: ZodSchema) => {
       next();
     } catch (error) {
       if (error instanceof ZodError) {
-        const details = error.errors.reduce(
-          (acc, err) => {
-            const path = err.path.join('.');
-            acc[path] = err.message;
-            return acc;
-          },
-          {} as Record<string, string>
-        );
+        const details: Record<string, string> = {};
+        
+        for (const err of error.errors) {
+          const path = err.path.join('.');
+          details[path] = err.message;
+        }
 
         next(new ValidationError('Validation failed', details));
       } else {
-        next(error);
+        next(error as Error);
       }
     }
   };
@@ -78,18 +74,16 @@ export const validateQuery = (schema: ZodSchema) => {
       next();
     } catch (error) {
       if (error instanceof ZodError) {
-        const details = error.errors.reduce(
-          (acc, err) => {
-            const path = err.path.join('.');
-            acc[path] = err.message;
-            return acc;
-          },
-          {} as Record<string, string>
-        );
+        const details: Record<string, string> = {};
+        
+        for (const err of error.errors) {
+          const path = err.path.join('.');
+          details[path] = err.message;
+        }
 
         next(new ValidationError('Invalid query parameters', details));
       } else {
-        next(error);
+        next(error as Error);
       }
     }
   };

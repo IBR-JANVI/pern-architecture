@@ -26,7 +26,7 @@ export const requireRole = (...roles: Role[]) => {
 
 export const requireAdmin = (
   req: AuthRequest,
-  res: Response,
+  _res: Response,
   next: NextFunction
 ): void => {
   if (!req.user) {

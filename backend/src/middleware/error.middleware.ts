@@ -25,7 +25,9 @@ export const errorMiddleware = (
     stack: err.stack,
   });
 
-  if (process.env.NODE_ENV === 'development') {
+  const nodeEnv = process.env.NODE_ENV || 'development';
+
+  if (nodeEnv === 'development') {
     res.status(500).json({
       success: false,
       error: {
